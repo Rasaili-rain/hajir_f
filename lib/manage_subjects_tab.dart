@@ -17,6 +17,32 @@ class ManageSubjectsTab extends StatelessWidget {
     required this.deleteSubject,
   });
 
+  // Method to show confirmation dialog
+  void _showDeleteConfirmation(BuildContext context, int index) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Delete'),
+          content: Text('Are you sure you want to delete "${subjects[index].name}"?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(), // Cancel
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                deleteSubject(index);
+                Navigator.of(context).pop(); // Close dialog
+              },
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -66,7 +92,7 @@ class ManageSubjectsTab extends StatelessWidget {
                         title: Text(subjects[index].name),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => deleteSubject(index),
+                          onPressed: () => _showDeleteConfirmation(context, index),
                         ),
                       );
                     },
