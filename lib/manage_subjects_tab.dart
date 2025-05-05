@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'progress_bar.dart';
+import 'subject_modal.dart';
 
 class ManageSubjectsTab extends StatelessWidget {
   final List<Subject> subjects;

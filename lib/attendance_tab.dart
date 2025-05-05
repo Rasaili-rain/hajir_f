@@ -1,5 +1,6 @@
-  import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'progress_bar.dart';
+import 'subject_modal.dart';
 
 class AttendanceTab extends StatelessWidget {
   final List<Subject> subjects;

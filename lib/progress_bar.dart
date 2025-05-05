@@ -1,28 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pie_chart/pie_chart.dart';
-
-// Data model for a Subject
-class Subject {
-  String name;
-  int presentDays;
-  int totalDays;
-
-  Subject({required this.name, this.presentDays = 0, this.totalDays = 0});
-
-  // Convert Subject to JSON
-  Map<String, dynamic> toJson() => {
-        'name': name,
-        'presentDays': presentDays,
-        'totalDays': totalDays,
-      };
-
-  // Create Subject from JSON
-  factory Subject.fromJson(Map<String, dynamic> json) => Subject(
-        name: json['name'] as String,
-        presentDays: json['presentDays'] as int,
-        totalDays: json['totalDays'] as int,
-      );
-}
+import 'subject_modal.dart';
 
 class ProgressBar extends StatelessWidget {
   final Subject subject;
@@ -36,11 +14,8 @@ class ProgressBar extends StatelessWidget {
     required this.updateSubject,
   });
 
-  // Interpolate color based on percentage (ported from React Native)
   Color interpolateColor(double percentage) {
-    if (percentage == 0 || percentage == 100) {
-      return const Color(0xFF4ECDC4); // #4ECDC4
-    }
+    if (percentage == 100 ) return const Color(0xFF4ECDC4);
     final ratio = (percentage - 1).abs() / 99;
     final r = (139 + (78 - 139) * ratio).round();
     final g = (0 + (205 - 0) * ratio).round();
@@ -48,7 +23,6 @@ class ProgressBar extends StatelessWidget {
     return Color.fromRGBO(r, g, b, 1.0);
   }
 
-  // Handle button actions
   void handleAction(String action) {
     Subject updated = Subject(
       name: subject.name,
@@ -76,119 +50,118 @@ class ProgressBar extends StatelessWidget {
     final percentage = subject.totalDays == 0
         ? 100.0
         : ((subject.presentDays / subject.totalDays) * 100).roundToDouble();
-    final isWarning = percentage < 85 && percentage != 0;
+    final isWarning = percentage < 85 ;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    // Pie chart data
     final dataMap = <String, double>{
       "Present": percentage,
       "Remaining": 100 - percentage,
     };
     final colorList = [
       interpolateColor(percentage),
-      const Color(0xFFDDE1E8), // #DDE1E8
+      const Color(0xFFDDE1E8),
     ];
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 12.0),
-      padding: const EdgeInsets.all(12.0),
+      margin: const EdgeInsets.symmetric(vertical: 2.0),
+      padding: const EdgeInsets.all(6.0),
       decoration: BoxDecoration(
         color: isWarning ? const Color(0xFFFFF5F5) : Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: isWarning ? const Color(0xFFFF6B6B) : const Color(0xFFDDE1E8),
         ),
         boxShadow: const [
           BoxShadow(
             color: Colors.black12,
-            offset: Offset(0, 2),
-            blurRadius: 4,
+            offset: Offset(0, 1),
+            blurRadius: 2,
             spreadRadius: 0,
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Subject name and attendance on left, pie chart on right
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Left: Subject name and attendance
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      subject.name,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: isWarning ? const Color(0xFFFF6B6B) : const Color(0xFF2D3748),
-                      ),
-                      overflow: TextOverflow.ellipsis,
+          // Left Container: Description and Buttons
+          Expanded(
+            flex: 2,
+            child: Container(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Description
+                  Text(
+                    subject.name,
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: isWarning ? const Color(0xFFFF6B6B) : const Color(0xFF2D3748),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${subject.presentDays}/${subject.totalDays}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: isWarning ? const Color(0xFFFF6B6B) : const Color(0xFF2D3748),
-                      ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    '${subject.presentDays}/${subject.totalDays}',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: isWarning ? const Color(0xFFFF6B6B) : const Color(0xFF2D3748),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 8.0),
+                  // Buttons in a horizontal row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      _buildButton(
+                        label: 'Undo',
+                        color: const Color(0xFF6A0DAD),
+                        onPressed: () => handleAction('decrement'),
+                      ),
+                      const SizedBox(width: 4.0),
+                      _buildButton(
+                        label: 'Absent',
+                        color: const Color(0xFFFF6B6B),
+                        onPressed: () => handleAction('absent'),
+                      ),
+                      const SizedBox(width: 4.0),
+                      _buildButton(
+                        label: 'Present',
+                        color: const Color(0xFF4ECDC4),
+                        onPressed: () => handleAction('present'),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              // Right: Pie chart
-              SizedBox(
-                width: screenWidth * 0.3, // 30% of screen width
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    PieChart(
-                      dataMap: dataMap,
-                      colorList: colorList,
-                      chartRadius: screenWidth * 0.3, // Responsive size
-                      legendOptions: const LegendOptions(showLegends: false),
-                      chartValuesOptions: const ChartValuesOptions(showChartValues: false),
-                    ),
-                    Text(
-                      '${percentage.toInt()}%',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF2D3748),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
-          const SizedBox(height: 12),
-          // Buttons at the bottom
-          Wrap(
-            alignment: WrapAlignment.end,
-            spacing: 8.0,
-            runSpacing: 8.0,
-            children: [
-              _buildButton(
-                label: 'Undo',
-                color: const Color(0xFF6A0DAD), // Purple
-                onPressed: () => handleAction('decrement'),
-              ),
-              _buildButton(
-                label: 'Absent',
-                color: const Color(0xFFFF6B6B), // Red
-                onPressed: () => handleAction('absent'),
-              ),
-              _buildButton(
-                label: 'Present',
-                color: const Color(0xFF4ECDC4), // Green
-                onPressed: () => handleAction('present'),
-              ),
-            ],
+          // Right Container: Pie Chart
+          SizedBox(
+            width: screenWidth * 0.35,
+            height: screenWidth * 0.35,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                PieChart(
+                  dataMap: dataMap,
+                  colorList: colorList,
+                  chartRadius: screenWidth * 0.35,
+                  legendOptions: const LegendOptions(showLegends: false),
+                  chartValuesOptions: const ChartValuesOptions(showChartValues: false),
+                ),
+                Text(
+                  '${percentage.toInt()}%',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF2D3748),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -204,12 +177,12 @@ class ProgressBar extends StatelessWidget {
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(6),
         ),
-        minimumSize: const Size(70, 36),
-        textStyle: const TextStyle(fontSize: 14),
+        minimumSize: const Size(60, 30),
+        textStyle: const TextStyle(fontSize: 16),
       ),
       child: Text(
         label,

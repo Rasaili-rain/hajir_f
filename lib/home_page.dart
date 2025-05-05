@@ -3,13 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'attendance_tab.dart';
 import 'manage_subjects_tab.dart';
-import 'progress_bar.dart';
+import 'subject_modal.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
-
   final String title;
-
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
@@ -110,6 +108,7 @@ class _MyHomePageState extends State<MyHomePage> {
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
           title: Text(widget.title),
+          toolbarHeight: 20,
           bottom: const TabBar(
             tabs: [
               Tab(text: 'Attendance'),
